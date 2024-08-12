@@ -1,8 +1,15 @@
+import { ResponseInterface } from "../../types/chat"
+import MarkdownEditor from "./MarkDownEditor"
 
-export default function MarkdownResponsePanel(){
+interface markdownResponseProps {
+    response: ResponseInterface
+}
+export default function MarkdownResponsePanel({ response }: markdownResponseProps) {
     return (
-        <div>
-            MarkdownResponsePanel
+        <div className="flex justify-start">
+            <div className="bg-blue-700 p-2 rounded-md max-w-[40%]">
+                <MarkdownEditor markdownContent={response.value} />
+            </div>
         </div>
     )
 }

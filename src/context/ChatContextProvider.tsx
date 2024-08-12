@@ -1,11 +1,13 @@
 import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useState } from "react";
-import { messageInterface } from "../types/chat";
+import { messageInterface, PromptInterface, PromptResponsePair, ResponseInterface } from "../types/chat";
 
 interface chatContextInterface {
-    messages: messageInterface[];
-    setMessages: Dispatch<SetStateAction<messageInterface[]>>;
-    updateChats: (message: messageInterface) => void;
-    updateStream: (message: string) => void;
+    messages: PromptResponsePair[];
+    setMessages: Dispatch<SetStateAction<PromptResponsePair[]>>;
+    isGenerate: boolean;
+    setGenerate: Dispatch<SetStateAction<boolean>>;
+    handlePrompt: (prompt: PromptInterface) => void
+    handleStream: (chunk: string) => void
 }
 const ChatContext = createContext<chatContextInterface>({} as chatContextInterface);
 
@@ -18,41 +20,47 @@ interface contextProviderProps {
 }
 
 export default function ChartContextProvider({ children }: contextProviderProps) {
-    const [stream, setStream] = useState<string>("")
-    const [messages, setMessages] = useState<messageInterface[]>(intialState)
-    const updateChats = (message: messageInterface) => {
-        setMessages((pre) => [...pre, message])
+    const [messages, setMessages] = useState<PromptResponsePair[]>(intialState)
+    const [isGenerate, setGenerate] = useState<boolean>(false)
+
+    const handlePrompt = (prompt: PromptInterface) => {
+        setMessages(pre => [...pre, { prompt }])
     }
 
-    const updateStream = (message: string) => {
-        setMessages(prevMessages => {
-            const lastMessage = prevMessages.at(-1);
+    const handleStream = (chunk: string) => {
+        setMessages((prevMessages) => {
+            const lastIndex = prevMessages.length - 1;
+            if (lastIndex < 0) return prevMessages; // Return early if the array is empty
 
-            if (lastMessage?.isStream) {
-                const updatedLastMessage = { ...lastMessage, value: lastMessage.value + message };
-                return [...prevMessages.slice(0, -1), updatedLastMessage];
-            } else {
-                const newMessage: messageInterface = { value: message, type: "in", isStream: true };
-                return [...prevMessages, newMessage];
-            }
+            return prevMessages.map((message, i) =>
+                i === lastIndex
+                    ? {
+                        ...message,
+                        response: {
+                            ...message.response,
+                            value: (message.response?.value || '') + chunk,
+                        },
+                    }
+                    : message
+            );
         });
     }
 
     return (
-        <ChatContext.Provider value={{ messages, setMessages, updateChats, updateStream }}>
+        <ChatContext.Provider value={{ messages, setMessages, isGenerate, setGenerate, handlePrompt, handleStream }}>
             {children}
         </ChatContext.Provider>
     )
 }
 
-
-const intialState: messageInterface[] = [
+const intialState: PromptResponsePair[] = [
     {
-        type: "in",
-        value: "hello world"
-    },
-    {
-        type: "out",
-        value: "ChartContextProvider"
+        prompt: {
+            value: "hello world"
+        },
+        response: {
+            value: "ChartContextProvider",
+            isStream: false
+        }
     }
 ]
