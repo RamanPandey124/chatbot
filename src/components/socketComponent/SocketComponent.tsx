@@ -2,6 +2,7 @@ import React, { useEffect } from "react"
 import { useChatContext } from "../../context/ChatContextProvider"
 import socket from "../../socket/Socket"
 import ReactToast from "../react-hot-toast/ReactToast"
+import debounce from "../../helpers/Debounce"
 
 export default function SocketComponent() {
     const { handleStream, isGenerate, setGenerate } = useChatContext()
@@ -27,9 +28,10 @@ export default function SocketComponent() {
             ReactToast("success", "Socket notification", "Connection stabilized to socket");
         });
 
+        const toastError = debounce(ReactToast, 3000)
         socket.io.on("error", (error) => {
-            ReactToast("error", "Socket notification", "SOCKET_CONNECTION_REFUSED");
             setGenerate(false);
+            toastError("error", "Socket notification", "SOCKET_CONNECTION_REFUSED")
         });
 
         return () => {

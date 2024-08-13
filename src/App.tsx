@@ -6,7 +6,9 @@ import { Toaster } from 'react-hot-toast';
 const App: React.FC = () => {
   return (
     <div className="h-screen w-screen bg-black text-white">
-      <Toaster/>
+      <Toaster
+        toastOptions={{ duration: 2000 }}
+      />
       <ChatContainer />
     </div>
   );

@@ -15,7 +15,7 @@ export default function InputBox() {
     }
 
     const handleSubmit = () => {
-        if (!inputValue || isGenerate) return null
+        if (!inputValue || isGenerate || !socket.connected) return null
         socket.emit("prompt", { id: messages.length, value: inputValue })
         const newMessage: PromptInterface = {
             value: inputValue
@@ -27,6 +27,7 @@ export default function InputBox() {
 
     const handleStop = () => {
         setGenerate(false)
+        socket.emit('stop',messages.length-1)
     }
 
     return (
