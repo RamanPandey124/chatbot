@@ -5,7 +5,7 @@ import MarkdownResponsePanel from "./chatComponents/MarkdownResponsePanel";
 
 export default function ChatView() {
     const { messages } = useChatContext()
-    const messagesEndRef = useRef(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
