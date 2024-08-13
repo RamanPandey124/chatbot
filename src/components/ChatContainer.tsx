@@ -1,8 +1,8 @@
-import { useEffect } from "react";
-import ChartContextProvider, { useChatContext } from "../context/ChatContextProvider";
+import React from "react";
+import ChartContextProvider from "../context/ChatContextProvider";
 import ChatView from "./ChatView";
 import InputBox from "./InputBox";
-import socket from "../socket/Socket";
+import SocketComponent from "./socketComponent/SocketComponent";
 
 export default function ChatContainer() {
     return (
@@ -12,28 +12,4 @@ export default function ChatContainer() {
             <SocketComponent />
         </ChartContextProvider>
     )
-}
-
-function SocketComponent() {
-    const { handleStream, isGenerate, setGenerate } = useChatContext()
-
-    useEffect(() => {
-        socket.on("chunk", (response: { value: string, isStream: boolean }) => {
-            const { value, isStream } = response
-            if (isGenerate) {
-                handleStream(value)
-            }
-            if (!isStream) { setGenerate(false) }
-        })
-
-        return () => {
-            socket.off('chunk');
-        };
-    }, [isGenerate])
-
-    useEffect(() => {
-        socket.connect();
-    }, [])
-
-    return null
 }
